@@ -27,7 +27,7 @@ O objetivo é compreender na prática como estruturar uma infraestrutura básica
 
 ![Arquitetura AWS](./Arquitetura.gif)
 
-*Diagrama da arquitetura montada durante o bootcamp*
+_Diagrama da arquitetura montada durante o bootcamp_
 
 </div>
 
@@ -35,41 +35,40 @@ O objetivo é compreender na prática como estruturar uma infraestrutura básica
 
 ## 🎯 Objetivos de Aprendizagem
 
-- [ ] Entender os fundamentos de computação em nuvem com AWS
-- [ ] Criar e configurar serviços essenciais da AWS
-- [ ] Compreender conceitos de redes, segurança e escalabilidade
-- [ ] Montar uma arquitetura funcional como projeto prático
+- [x] Entender os fundamentos de computação em nuvem com AWS
+- [x] Criar e configurar serviços essenciais da AWS
+- [x] Compreender conceitos de redes, segurança e escalabilidade
+- [x] Montar uma arquitetura funcional como projeto prático
 
 ---
 
 ## 🛠️ Serviços AWS Abordados
 
-| Serviço | Descrição |
-|--------|-----------|
-| **EC2** | Instâncias de computação virtual |
-| **VPC** | Rede virtual privada e isolada |
-| **S3** | Armazenamento de objetos escalável |
+| Serviço | Descrição                            |
+| ------- | ------------------------------------ |
+| **EC2** | Instâncias de computação virtual     |
+| **S3**  | Armazenamento de objetos escalável   |
 | **RDS** | Banco de dados relacional gerenciado |
-| **IAM** | Controle de identidade e acesso |
-| **ELB** | Balanceador de carga elástico |
-| **Auto Scaling** | Escalabilidade automática de recursos |
+| **IAM** | Controle de identidade e acesso      |
+| **ELB** | Balanceador de carga elástico        |
 
 ---
 
 ## 📚 Contexto do Bootcamp
 
-| | |
-|---|---|
-| **Programa** | Bootcamp GFT — Fundamentos de Cloud com AWS |
+|                |                                                     |
+| -------------- | --------------------------------------------------- |
+| **Programa**   | Bootcamp GFT — Fundamentos de Cloud com AWS         |
 | **Plataforma** | [Digital Innovation One (DIO)](https://www.dio.me/) |
-| **Parceiro** | GFT Technologies |
-| **Foco** | Cloud Computing, AWS, DevOps |
+| **Parceiro**   | GFT Technologies                                    |
+| **Foco**       | Cloud Computing, AWS, DevOps                        |
 
 ---
 
 ## 🚀 Como Utilizar Este Repositório
 
 1. Clone o repositório:
+
 ```bash
 git clone https://github.com/seu-usuario/devops-intro-arc.git
 ```
