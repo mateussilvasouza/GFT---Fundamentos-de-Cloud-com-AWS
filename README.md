@@ -1,27 +1,48 @@
 <div align="center">
 
-# ☁️ Arquitetura Intro DevOps na AWS
+# ☁️ Arquitetura e Automação AWS
 
 **Bootcamp DIO × GFT — Fundamentos de Cloud com AWS**
 
 [![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/)
+[![Step Functions](https://img.shields.io/badge/Step%20Functions-Workflows-FF4F8B?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/step-functions/)
 [![DIO](https://img.shields.io/badge/DIO-Bootcamp-E91E63?style=for-the-badge&logo=dio&logoColor=white)](https://www.dio.me/)
 [![GFT](https://img.shields.io/badge/GFT-Parceiro-0071CE?style=for-the-badge&logoColor=white)](https://www.gft.com/br/)
-[![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=for-the-badge)](.)
+[![Status](https://img.shields.io/badge/Status-Conclu%C3%ADdo-brightgreen?style=for-the-badge)](.)
 
 </div>
 
 ---
 
-## 📋 Sobre o Projeto
+## 📋 Sobre o Repositório
 
-Este repositório documenta a **montagem inicial de uma arquitetura cloud** desenvolvida como material de estudo durante o **Bootcamp DIO × GFT — Fundamentos de Cloud com AWS**.
+Este repositório documenta a jornada de aprendizado no **Bootcamp DIO × GFT — Fundamentos de Cloud com AWS**, reunindo dois laboratórios práticos implementados e validados na AWS:
 
-O objetivo é compreender na prática como estruturar uma infraestrutura básica na AWS, explorando os principais serviços da plataforma e suas integrações.
+- **Lab 1 — Arquitetura Intro DevOps:** montagem de infraestrutura cloud com os principais serviços AWS
+- **Lab 2 — Workflows com Step Functions:** pipeline serverless completo com AWS Step Functions, Lambda, S3 e API Gateway — exportação de dados da PokeAPI para CSV com download automático
 
 ---
 
-## 🏗️ Arquitetura
+## 📁 Estrutura
+
+```
+devops-intro-arc/
+├── README.md                              # Este arquivo
+├── Arquitetura.gif                        # Diagrama da arquitetura (Lab 1)
+└── step-functions/
+    ├── notes.md                           # Anotações, conceitos e lições aprendidas
+    └── pokemon-csv-export/                # Projeto prático completo
+        ├── state-machine.json             # Standard Workflow — pipeline de exportação
+        ├── infrastructure.md              # Guia completo de implementação na AWS
+        └── lambdas/
+            ├── fetch-pokemon-list/        # Busca 1025 pokémons via pokemon-species e divide em batches
+            ├── fetch-pokemon-batch/       # Busca detalhes em paralelo com retry e fallback para formas
+            └── generate-csv/             # Gera CSV, faz upload S3 e retorna presigned URL
+```
+
+---
+
+## 🏗️ Lab 1 — Arquitetura Intro DevOps
 
 <div align="center">
 
@@ -31,6 +52,110 @@ _Diagrama da arquitetura montada durante o bootcamp_
 
 </div>
 
+### Serviços Abordados
+
+| Serviço | Descrição |
+| ------- | --------- |
+| **EC2** | Instâncias de computação virtual |
+| **S3**  | Armazenamento de objetos escalável |
+| **RDS** | Banco de dados relacional gerenciado |
+| **IAM** | Controle de identidade e acesso |
+| **ELB** | Balanceador de carga elástico |
+
+---
+
+## ⚙️ Lab 2 — Workflows Automatizados com AWS Step Functions
+
+AWS Step Functions é um serviço de **orquestração serverless** que coordena múltiplos serviços AWS em workflows visuais. Cada passo é um **estado** dentro de uma **State Machine** definida em ASL (Amazon States Language).
+
+### Conceitos Fundamentais
+
+| Conceito | Descrição |
+| -------- | --------- |
+| **State Machine** | Definição do workflow completo em ASL |
+| **State (Estado)** | Unidade individual de trabalho |
+| **Execution** | Uma instância de execução da State Machine |
+| **ASL** | JSON que define estados e transições |
+| **Standard Workflow** | Tipo assíncrono, auditável, até 1 ano de duração |
+| **Express Workflow** | Tipo síncrono, até 5 minutos — não suporta `DescribeExecution` |
+
+### Tipos de Estado
+
+| Estado | Função |
+| ------ | ------- |
+| `Task` | Executa trabalho (Lambda, DynamoDB, SNS, etc.) |
+| `Choice` | Ramificação condicional |
+| `Wait` | Pausa por tempo ou até timestamp |
+| `Parallel` | Executa branches simultaneamente |
+| `Map` | Itera sobre uma lista com concorrência controlada |
+| `Pass` | Transforma dados sem executar trabalho |
+| `Succeed` | Termina com sucesso |
+| `Fail` | Termina com erro |
+
+Para conceitos detalhados, lições aprendidas na prática e armadilhas encontradas, veja [step-functions/notes.md](./step-functions/notes.md).
+
+---
+
+## 🔒 Projeto Prático — Pokemon CSV Export
+
+Pipeline serverless completo implementado e validado na AWS. Exporta dados de 1025 pokémons da PokeAPI para um arquivo CSV com download automático no browser.
+
+### Arquitetura
+
+```
+Browser
+  │
+  │  1. GET /pokemon/export
+  ▼
+API Gateway ──── Usage Plan (rate limit + API key)
+  │
+  │  StartExecution (assíncrono — retorna imediatamente)
+  ▼
+Step Functions Standard Workflow
+  │
+  ├── FetchPokemonList (Lambda)
+  │     └─ Busca 1025 pokémons via /pokemon-species
+  │     └─ Divide em 21 batches de 50
+  │
+  ├── FetchAllBatches (Map State, MaxConcurrency: 3)
+  │     └─ FetchPokemonBatch (Lambda) × 21
+  │           └─ Busca detalhes dos 50 pokémons em paralelo
+  │           └─ Retry automático em 502/503/429 (PokeAPI)
+  │           └─ Fallback para pokémons com formas (wormadam, deoxys, etc.)
+  │
+  └── GenerateCsv (Lambda)
+        └─ Monta CSV com 1025 linhas
+        └─ Upload para S3 (privado)
+        └─ Gera presigned URL (válida 5 min)
+  │
+  │  2. GET /pokemon/export/status?arn=...  (polling)
+  ▼
+API Gateway
+  │  DescribeExecution → quando SUCCEEDED retorna downloadUrl
+  ▼
+Browser acessa a presigned URL → download automático do CSV
+```
+
+### Serviços utilizados
+
+| Serviço | Papel |
+| ------- | ----- |
+| **API Gateway** | Endpoints REST + Usage Plan para rate limiting |
+| **Step Functions** | Orquestração do pipeline (Standard Workflow) |
+| **Lambda** (×3) | Lógica de busca, transformação e geração do CSV |
+| **S3** | Armazenamento temporário do CSV |
+| **IAM** | Roles com permissões mínimas por serviço |
+
+### Arquivos
+
+| Componente | Arquivo |
+| ---------- | ------- |
+| State Machine (ASL) | [state-machine.json](./step-functions/pokemon-csv-export/state-machine.json) |
+| Lambda — lista pokémons | [fetch-pokemon-list/index.mjs](./step-functions/pokemon-csv-export/lambdas/fetch-pokemon-list/index.mjs) |
+| Lambda — detalhes batch | [fetch-pokemon-batch/index.mjs](./step-functions/pokemon-csv-export/lambdas/fetch-pokemon-batch/index.mjs) |
+| Lambda — gera CSV | [generate-csv/index.mjs](./step-functions/pokemon-csv-export/lambdas/generate-csv/index.mjs) |
+| Guia de implementação | [infrastructure.md](./step-functions/pokemon-csv-export/infrastructure.md) |
+
 ---
 
 ## 🎯 Objetivos de Aprendizagem
@@ -39,49 +164,34 @@ _Diagrama da arquitetura montada durante o bootcamp_
 - [x] Criar e configurar serviços essenciais da AWS
 - [x] Compreender conceitos de redes, segurança e escalabilidade
 - [x] Montar uma arquitetura funcional como projeto prático
-
----
-
-## 🛠️ Serviços AWS Abordados
-
-| Serviço | Descrição                            |
-| ------- | ------------------------------------ |
-| **EC2** | Instâncias de computação virtual     |
-| **S3**  | Armazenamento de objetos escalável   |
-| **RDS** | Banco de dados relacional gerenciado |
-| **IAM** | Controle de identidade e acesso      |
-| **ELB** | Balanceador de carga elástico        |
+- [x] Compreender o modelo de orquestração com AWS Step Functions
+- [x] Escrever State Machines em ASL (Amazon States Language)
+- [x] Aplicar padrões de tratamento de erros (Retry, Catch, fallback)
+- [x] Integrar Step Functions com Lambda, S3 e API Gateway
+- [x] Implementar padrão assíncrono com StartExecution + DescribeExecution
+- [x] Configurar IAM com permissões mínimas por tipo de recurso
 
 ---
 
 ## 📚 Contexto do Bootcamp
 
-|                |                                                     |
-| -------------- | --------------------------------------------------- |
-| **Programa**   | Bootcamp GFT — Fundamentos de Cloud com AWS         |
+| | |
+| --- | --- |
+| **Programa** | Bootcamp GFT — Fundamentos de Cloud com AWS |
 | **Plataforma** | [Digital Innovation One (DIO)](https://www.dio.me/) |
-| **Parceiro**   | GFT Technologies                                    |
-| **Foco**       | Cloud Computing, AWS, DevOps                        |
+| **Parceiro** | GFT Technologies |
+| **Foco** | Cloud Computing, AWS, DevOps, Step Functions |
 
 ---
 
-## 🚀 Como Utilizar Este Repositório
+## 🔗 Recursos de Referência
 
-1. Clone o repositório:
-
-```bash
-git clone https://github.com/seu-usuario/devops-intro-arc.git
-```
-
-2. Explore os recursos e a documentação da arquitetura
-
-3. Use como referência para montar sua própria infraestrutura na AWS seguindo o diagrama
-
----
-
-## 🤝 Contribuição
-
-Este é um projeto de estudo individual desenvolvido durante o bootcamp. Sugestões e feedbacks são bem-vindos via [Issues](../../issues).
+- [AWS Step Functions — Documentação oficial](https://docs.aws.amazon.com/step-functions/)
+- [Amazon States Language (ASL)](https://states-language.net/spec.html)
+- [Step Functions Workshop](https://catalog.workshops.aws/stepfunctions/en-US)
+- [API Gateway — Integrações com serviços AWS](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-integration-types.html)
+- [AWS WAF — Documentação oficial](https://docs.aws.amazon.com/waf/)
+- [PokeAPI](https://pokeapi.co/)
 
 ---
 

@@ -1,0 +1,126 @@
+{
+  "Comment": "Pokemon CSV Export — Standard Workflow (assíncrono). API Gateway inicia via StartExecution e consulta o resultado via DescribeExecution. Retorna uma presigned URL S3 para download automático do CSV.",
+  "StartAt": "FetchPokemonList",
+  "States": {
+
+    "FetchPokemonList": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FetchPokemonListFunctionArn}",
+        "Payload.$": "$"
+      },
+      "ResultSelector": {
+        "batches.$": "$.Payload.batches",
+        "total.$": "$.Payload.total"
+      },
+      "TimeoutSeconds": 30,
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException", "Lambda.TooManyRequestsException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.erro",
+          "Next": "ExportError"
+        }
+      ],
+      "Next": "FetchAllBatches"
+    },
+
+    "FetchAllBatches": {
+      "Type": "Map",
+      "Comment": "Processa cada batch de 50 pokémons em paralelo. MaxConcurrency: 3 reduz rate-limit da PokeAPI.",
+      "ItemsPath": "$.batches",
+      "MaxConcurrency": 3,
+      "Parameters": {
+        "batchIndex.$": "$$.Map.Item.Value.batchIndex",
+        "items.$": "$$.Map.Item.Value.items"
+      },
+      "Iterator": {
+        "StartAt": "FetchPokemonBatch",
+        "States": {
+          "FetchPokemonBatch": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "${FetchPokemonBatchFunctionArn}",
+              "Payload.$": "$"
+            },
+            "ResultSelector": {
+              "pokemon.$": "$.Payload.pokemon"
+            },
+            "TimeoutSeconds": 60,
+            "Retry": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "IntervalSeconds": 3,
+                "MaxAttempts": 2,
+                "BackoffRate": 2
+              }
+            ],
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$.batchResults",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.erro",
+          "Next": "ExportError"
+        }
+      ],
+      "Next": "GenerateCsv"
+    },
+
+    "GenerateCsv": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${GenerateCsvFunctionArn}",
+        "Payload": {
+          "batchResults.$": "$.batchResults",
+          "total.$": "$.total"
+        }
+      },
+      "ResultSelector": {
+        "downloadUrl.$": "$.Payload.downloadUrl",
+        "filename.$": "$.Payload.filename",
+        "totalRecords.$": "$.Payload.totalRecords"
+      },
+      "TimeoutSeconds": 30,
+      "Retry": [
+        {
+          "ErrorEquals": ["Lambda.ServiceException"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 2,
+          "BackoffRate": 1.5
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.erro",
+          "Next": "ExportError"
+        }
+      ],
+      "Next": "ExportSuccess"
+    },
+
+    "ExportSuccess": {
+      "Type": "Succeed"
+    },
+
+    "ExportError": {
+      "Type": "Fail",
+      "Error": "ExportFailed",
+      "Cause": "Erro durante a exportação do CSV. Verifique os logs do CloudWatch."
+    }
+  }
+}
