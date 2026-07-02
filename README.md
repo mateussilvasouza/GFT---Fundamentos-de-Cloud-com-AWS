@@ -29,8 +29,20 @@ Este repositório documenta a jornada de aprendizado no **Bootcamp DIO × GFT �
 devops-intro-arc/
 ├── README.md                              # Este arquivo
 ├── Arquitetura.gif                        # Diagrama da arquitetura (Lab 1)
+├── ec2/
+│   └── notes.md                           # EC2: conceitos, setup Node.js, SDK v3
+├── cli/
+│   └── notes.md                           # AWS CLI: configuração, comandos essenciais
+├── eks/
+│   └── notes.md                           # EKS: Kubernetes gerenciado, deploy Node.js
+├── kms/
+│   └── notes.md                           # KMS: criptografia, envelope encryption, SDK v3
+├── cloudformation/
+│   └── notes.md                           # CloudFormation: IaC, templates YAML, SDK v3
+├── codedeploy/
+│   └── notes.md                           # CodeDeploy: appspec.yml, hooks, scripts Node.js
 └── step-functions/
-    ├── notes.md                           # Anotações, conceitos e lições aprendidas
+    ├── notes.md                           # Step Functions: ASL, estados, lições práticas
     └── pokemon-csv-export/                # Projeto prático completo
         ├── state-machine.json             # Standard Workflow — pipeline de exportação
         ├── infrastructure.md              # Guia completo de implementação na AWS
@@ -52,15 +64,20 @@ _Diagrama da arquitetura montada durante o bootcamp_
 
 </div>
 
-### Serviços Abordados
+### Serviços e Ferramentas Estudados
 
-| Serviço | Descrição |
-| ------- | --------- |
-| **EC2** | Instâncias de computação virtual |
-| **S3**  | Armazenamento de objetos escalável |
-| **RDS** | Banco de dados relacional gerenciado |
-| **IAM** | Controle de identidade e acesso |
-| **ELB** | Balanceador de carga elástico |
+| Serviço / Ferramenta | O que é | Notas |
+| -------------------- | ------- | ----- |
+| **EC2** | Máquinas virtuais na nuvem | [ec2/notes.md](./ec2/notes.md) |
+| **AWS CLI** | Interface de linha de comando para todos os serviços AWS | [cli/notes.md](./cli/notes.md) |
+| **EKS** | Kubernetes gerenciado — orquestração de containers | [eks/notes.md](./eks/notes.md) |
+| **KMS** | Gerenciamento de chaves de criptografia | [kms/notes.md](./kms/notes.md) |
+| **CloudFormation** | Infraestrutura como Código (IaC) | [cloudformation/notes.md](./cloudformation/notes.md) |
+| **CodeDeploy** | Deploy automatizado em EC2, Lambda e ECS | [codedeploy/notes.md](./codedeploy/notes.md) |
+| **S3** | Armazenamento de objetos escalável | — |
+| **RDS** | Banco de dados relacional gerenciado | — |
+| **IAM** | Controle de identidade e acesso | — |
+| **ELB** | Balanceador de carga elástico | — |
 
 ---
 
@@ -161,9 +178,15 @@ Browser acessa a presigned URL → download automático do CSV
 ## 🎯 Objetivos de Aprendizagem
 
 - [x] Entender os fundamentos de computação em nuvem com AWS
-- [x] Criar e configurar serviços essenciais da AWS
+- [x] Criar e configurar serviços essenciais da AWS (EC2, S3, RDS, IAM, ELB)
 - [x] Compreender conceitos de redes, segurança e escalabilidade
 - [x] Montar uma arquitetura funcional como projeto prático
+- [x] Gerenciar instâncias EC2 e hospedar aplicações Node.js com PM2
+- [x] Usar a AWS CLI para automação e scripts de infraestrutura
+- [x] Orquestrar containers com EKS (Kubernetes gerenciado)
+- [x] Proteger dados com KMS usando envelope encryption
+- [x] Descrever infraestrutura como código com CloudFormation
+- [x] Automatizar deploys com CodeDeploy e estratégias de rollback
 - [x] Compreender o modelo de orquestração com AWS Step Functions
 - [x] Escrever State Machines em ASL (Amazon States Language)
 - [x] Aplicar padrões de tratamento de erros (Retry, Catch, fallback)
