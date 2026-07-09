@@ -46,6 +46,7 @@ devops-intro-arc/
     └── pokemon-csv-export/                # Projeto prático completo
         ├── state-machine.json             # Standard Workflow — pipeline de exportação
         ├── infrastructure.md              # Guia completo de implementação na AWS
+        ├── localstack.md                  # Teste do pipeline local via LocalStack + CLI
         └── lambdas/
             ├── fetch-pokemon-list/        # Busca 1025 pokémons via pokemon-species e divide em batches
             ├── fetch-pokemon-batch/       # Busca detalhes em paralelo com retry e fallback para formas
@@ -117,6 +118,8 @@ Para conceitos detalhados, lições aprendidas na prática e armadilhas encontra
 
 Pipeline serverless completo implementado e validado na AWS. Exporta dados de 1025 pokémons da PokeAPI para um arquivo CSV com download automático no browser.
 
+**Validado em dois ambientes:** o fluxo completo (3 Lambdas + Step Functions + S3) foi primeiro testado localmente via CLI com **LocalStack** (`awslocal`), simulando os serviços AWS num container Docker — sem custo e com iteração rápida — antes da implementação final na AWS real via console. Ver [localstack.md](./step-functions/pokemon-csv-export/localstack.md) para o passo a passo local e as lições aprendidas testando dessa forma.
+
 ### Arquitetura
 
 ```
@@ -172,6 +175,7 @@ Browser acessa a presigned URL → download automático do CSV
 | Lambda — detalhes batch | [fetch-pokemon-batch/index.mjs](./step-functions/pokemon-csv-export/lambdas/fetch-pokemon-batch/index.mjs) |
 | Lambda — gera CSV | [generate-csv/index.mjs](./step-functions/pokemon-csv-export/lambdas/generate-csv/index.mjs) |
 | Guia de implementação | [infrastructure.md](./step-functions/pokemon-csv-export/infrastructure.md) |
+| Guia de teste local | [localstack.md](./step-functions/pokemon-csv-export/localstack.md) |
 
 ---
 
@@ -193,6 +197,7 @@ Browser acessa a presigned URL → download automático do CSV
 - [x] Integrar Step Functions com Lambda, S3 e API Gateway
 - [x] Implementar padrão assíncrono com StartExecution + DescribeExecution
 - [x] Configurar IAM com permissões mínimas por tipo de recurso
+- [x] Simular a stack AWS localmente com LocalStack e validar o pipeline via CLI (`awslocal`) antes do deploy real
 
 ---
 

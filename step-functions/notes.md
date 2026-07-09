@@ -287,6 +287,8 @@ Step Functions
 
 Registro dos erros reais encontrados ao implementar o pipeline de exportação de 1025 Pokémons, e o raciocínio por trás de cada solução.
 
+> Antes do deploy na AWS real (lições abaixo), o pipeline foi validado localmente via CLI com **LocalStack** (`awslocal`) — deploy das 3 Lambdas, Step Functions e S3 rodando num container Docker. Ver [pokemon-csv-export/localstack.md](./pokemon-csv-export/localstack.md) para o passo a passo e as lições específicas de testar com LocalStack (sintaxe de ARN do IAM, placeholders do ASL não resolvidos pelo CLI, debug de execuções `FAILED` etc).
+
 ### 1. Express vs Standard: a escolha errada tem consequências sérias
 
 **Problema:** a state machine foi criada como Express Workflow. Quando o API Gateway tentou chamar `DescribeExecution` para verificar o status, a operação retornou erro — Express Workflow não suporta `DescribeExecution`.

@@ -2,3 +2,9 @@
 *:Zone.Identifier
 Thumbs.db
 .DS_Store
+
+# Artefatos de build/teste do LocalStack (Lambdas, state machine resolvida)
+step-functions/pokemon-csv-export/lambdas/**/function.zip
+step-functions/pokemon-csv-export/lambdas/**/response.json
+step-functions/pokemon-csv-export/lambdas/**/.env
+step-functions/pokemon-csv-export/state-machine.resolved.json
